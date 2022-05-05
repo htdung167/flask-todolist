@@ -1,2 +1,2 @@
-# todolist-flask
+# Todolist
 Todo list practice project based on flask.
