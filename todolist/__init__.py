@@ -1,9 +1,13 @@
+import imp
 from flask import Flask
 import os
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+from datetime import timedelta
 
 db = SQLAlchemy()
+login_manager = LoginManager()
 
 
 load_dotenv()
@@ -19,6 +23,7 @@ def create_database(app):
 
 def create_app():
     app = Flask(__name__)
+
     from todolist.user import user
     from todolist.views import views
     from todolist.models import User, Note
@@ -31,4 +36,14 @@ def create_app():
 
     app.register_blueprint(user)
     app.register_blueprint(views)
+
+    login_manager.init_app(app)
+
+    app.permanent_session_lifetime = timedelta(minutes=1)
+
+    login_manager.login_view = 'user.login'
+    @login_manager.user_loader
+    def loader_user(id): 
+        return User.query.get(int(id))
+
     return app
