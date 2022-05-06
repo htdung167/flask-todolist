@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, flash, request
+from flask import Blueprint, render_template, flash, request, jsonify
 from flask_login import login_required, current_user
+import json
 
 views = Blueprint("views", __name__)
 
@@ -20,3 +21,19 @@ def home():
             db.session.commit()
             flash("Note added!", category="success")
     return render_template("index.html", user=current_user)
+
+
+@views.route("/delete-note", methods=["POST"])
+@login_required
+def delete_note():
+    from todolist.models import Note
+    from todolist import db
+    note = json.loads(request.data)
+    # print(note)
+    note_id = note['note_id']
+    result = Note.query.get(note_id)
+    if result:
+        if result.user_id == current_user.id:
+            db.session.delete(result)
+            db.session.commit()
+    return jsonify({"code":200})
